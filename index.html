@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Info Windows</title>
+    <style>
+        #map {
+            height: 100%;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 5;
+        }
+    </style>
+</head>
+
+<body>
+<h3> Meteor Strike Search</h3>
+    <form>
+        <input id="ebox" name="ebox" type="text" placeholder="Enter Year">
+        <button enabled type="button">View Map</button>
+        <h1>Enter Year:  1950-01-01T00:00:00.000</h1>
+    </form>
+    <div id="map"></div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <script>
+        function initMap() {
+        // Create the map.
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 4,
+          center: {lat: 37.090, lng: -95.712},
+          mapTypeId:google.maps.MapTypeId.HYBRID 
+    
+            });
+            var endpoint = "https://data.nasa.gov/resource/y77d-th95.json";
+            var url = endpoint + "?year=" + $("#ebox").val();
+            $.ajax({
+                url: url,
+                type: "GET",
+                data: {
+                    "$limit": 50
+                }
+            }).done(function(data) {
+                //alert("Retrieved " + data.length + " records from the dataset!");
+                console.log(data);
+                $.each(data, function(i, v) {
+                    var marker = new google.maps.Marker({
+                        position: {
+                            lat: parseFloat(v.reclat),
+                            lng: parseFloat(v.reclong)
+                        },
+                        map: map,
+                        title: 'Chicago',
+                    });
+                    var infowindow = new google.maps.InfoWindow({
+                        content: "<h1>" + v.name + "</h1>" + "<p1>" + "Mass: " + v.mass + "</p1>" + "<p2>" + "       Id: " + v.id + "<p/2>"
+                    });
+                    marker.addListener('click', function() {
+                        infowindow.open(map, marker);
+                    });
+                });
+            });
+        }
+    </script>
+
+
+    <script>
+        $("button").on("click", initMap)
+         $("#ebox").on("input", function(e) {
+            if($("#ebox").val() != "") {
+                $("button").prop("disabled", false);
+            } else {
+                $("button").prop("disabled", true);
+            }
+        });
+    </script>
+
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA23qcXuGK77p1Smzt7qKsJsMF61TMvDaY">
+    </script>
+</body>
+
+</html>
